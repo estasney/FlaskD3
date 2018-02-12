@@ -11,5 +11,3 @@ migrate = Migrate(app_run, db)
 # toolbar = DebugToolbarExtension(app_run)
 
 from app_folder import routes, models
-
-# Does this re
