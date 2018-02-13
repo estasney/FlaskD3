@@ -1,12 +1,9 @@
 from flask import render_template, redirect, url_for, request, abort, jsonify, Response
 from operator import itemgetter
 from app_folder import app_run
+from app_folder.models import Skill, Association
 
 import pandas as pd
-
-f = r"/home/eric/FlaskD3/mysite/app_folder/alltopics5.csv"
-df = pd.read_csv(f)
-
 
 @app_run.route("/")
 def index():
@@ -30,30 +27,37 @@ def data():
         limit = int(limit)
 
 
-    # Find where it is origin
-    as_origin = df.loc[df['Origin'].str.lower() == term.lower()]
-    as_origin = as_origin.values.tolist()
+    # Locate skill object
+    skill = Skill.query.filter_by(name=term).first()
 
-    # Find where it is target
-    as_target = df.loc[df['Target'].str.lower() == term.lower()]
-    as_target = as_target.values.tolist()
-
-    data = []
-    for o in as_origin:
-        td = {'source': o[0], 'target': o[1], 'count': o[2]}
-        data.append(td)
-    for t in as_target:
-        td = {'source': t[0], 'target': t[1], 'count': t[2]}
-        data.append(td)
-
-    # Sort the data by count
-
-    data = sorted(data, key=itemgetter('count'), reverse=True)
+    # Data as origin
+    origin_data = skill.get_origins_data()
+    # Sorted
+    origin_data = sorted(origin_data, key=itemgetter(1), reverse=True)
 
     if limit:
-        data = data[:limit]
+        origin_data = origin_data[:limit]
 
-    return jsonify({'data': data})
+    # To dictionary form
+    origin_data_dict = []
+    for od in origin_data:
+        td = {od[0]: od[1]}
+        origin_data_dict.append(td)
+
+    # Find where it is target
+    target_data = skill.get_targets_data()
+    target_data = sorted(target_data, key=itemgetter(1), reverse=True)
+
+    if limit:
+        target_data = target_data[:limit]
+
+    # To dictionary form
+    target_data_dict = []
+    for od in target_data:
+        td = {od[0]: od[1]}
+        target_data_dict.append(td)
+
+    return jsonify({'origin': origin_data_dict, 'target': target_data_dict})
 
 
 
