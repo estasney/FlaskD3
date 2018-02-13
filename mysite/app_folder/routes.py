@@ -10,10 +10,7 @@ df = pd.read_csv(f)
 
 @app_run.route("/")
 def index():
-    """
-    When you request the root path, you'll get the index.html template.
 
-    """
     return render_template('index.html')
 
 @app_run.route("/data")
