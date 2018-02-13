@@ -38,12 +38,6 @@ def data():
     if limit:
         origin_data = origin_data[:limit]
 
-    # To dictionary form
-    origin_data_dict = []
-    for od in origin_data:
-        td = {od[0]: od[1]}
-        origin_data_dict.append(td)
-
     # Find where it is target
     target_data = skill.get_targets_data()
     target_data = sorted(target_data, key=itemgetter(1), reverse=True)
@@ -51,13 +45,16 @@ def data():
     if limit:
         target_data = target_data[:limit]
 
-    # To dictionary form
-    target_data_dict = []
-    for od in target_data:
-        td = {od[0]: od[1]}
-        target_data_dict.append(td)
+    data = []
+    for o in od:
+        td = {'source': o[0], 'target': skill.name, 'count': o[1]}
+        data.append(td)
 
-    return jsonify({'origin': origin_data_dict, 'target': target_data_dict})
+    for t in target_data:
+        td = {'source': skill.name, 'target': t[0], 'count': t[1]}
+        data.append(td)
+
+    return jsonify({'dzta': data})
 
 
 
