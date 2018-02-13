@@ -16,8 +16,14 @@ class Skill(db.Model):
     def get_targets(self):
         return [x.target for x in self.origin]
 
+    def get_targets_data(self):
+        return [(x.target.name, x.count) for x in self.origin]
+
     def get_origins(self):
         return [x.origin for x in self.target]
+
+    def get_origins_data(self):
+        return [(x.origin.name, x.count) for x in self.target]
 
 
 class Association(db.Model):
