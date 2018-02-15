@@ -52,8 +52,8 @@
 var data_url = "http://127.0.0.1:5000/data";
 $('#search').on('click', startSearch);
 
-var width = 1000;
-var height = 1000;
+var width = 500;
+var height = 500;
 var graph = {
   "nodes": [],
   "links": []
@@ -67,16 +67,15 @@ var svg = d3.select('body').append('svg')
 function startSearch() {
   var search_term = $("#search_term").prop('value');
   var limit_to = $('#limit_to').prop('value');
-  getData(search_term, limit_to);
+  getData(search_term, limit_to, false);
 }
 
 function appendSearch(clicked_term) {
   var limit_to = $('#limit_to').prop('value');
-  restart();
-  getData(clicked_term, limit_to);
+  getData(clicked_term, limit_to, true);
 }
 
-function getData(term, limit) {
+function getData(term, limit, is_update) {
   $.ajax({
     type: 'GET',
     async: true,
@@ -95,6 +94,9 @@ function getData(term, limit) {
     success: function(data) {
       var json_data = JSON.stringify(data);
       var search_data = JSON.parse(json_data).data;
+      if (is_update == true){
+        restart();
+      }
       newLinks(search_data);
     }
   });
@@ -245,5 +247,6 @@ function startForce() {
       .style("font", "14px serif");
   }
 }
+
 
 </script>
