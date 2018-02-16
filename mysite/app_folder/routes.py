@@ -37,6 +37,8 @@ def data():
     limit = request.args.get('limit')
     if limit:
         limit = int(limit)
+        if limit < 3:
+            limit = 3
     else:
         limit = 3
 
@@ -47,18 +49,6 @@ def data():
     # Find where it is target
     target_data = sorted(skill.get_targets_data(), key=itemgetter(1), reverse=True)[:limit]
 
-    # If clicked...
-    clicked = request.args.get('clicked')
-    if clicked:
-        clicked_skill = Skill.query.filter_by(name=term).first()
-        clicked_target_data = sorted(clicked_skill.get_targets_data(), key=itemgetter(1), reverse=True)[:limit]
-        clicked_origins_data = sorted(clicked_skill.get_origins_data(), key=itemgetter(1), reverse=True)[:limit]
-        for o in clicked_origins_data:
-            td = {'source': o[0].title(), 'target': clicked_skill.name.title(), 'count': o[1]}
-            data.append(td)
-        for t in clicked_target_data:
-            td = {'source': clicked_skill.name.title(), 'target': t[0].title(), 'count': t[1]}
-            data.append(td)
 
     for o in origin_data:
         td = {'source': o[0].title(), 'target': skill.name.title(), 'count': o[1], 'color': c}

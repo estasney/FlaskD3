@@ -40,6 +40,9 @@
       <span class="input-group-btn">
         <button class="btn btn-secondary" type="button" id="search">Go!</button>
       </span>
+      <span class="input-group-btn">
+        <button class="btn btn-secondary" type="button" id="reset">Reset!</button>
+      </span>
     </div>
   </div>
   <div class="container-fluid text-center">
@@ -51,6 +54,7 @@
 <script>
 var data_url = "http://127.0.0.1:5000/data";
 $('#search').on('click', startSearch);
+$('#reset').on('click', reset);
 
 var width = 1920;
 var height = 1080;
