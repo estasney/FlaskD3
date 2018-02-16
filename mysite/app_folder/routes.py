@@ -5,6 +5,14 @@ from app_folder.models import Skill, Association
 
 import pandas as pd
 
+import random
+import colorsys
+
+def bright_color():
+    h,s,l = random.random(), 0.5 + random.random()/2.0, 0.4 + random.random()/5.0
+    r,g,b = [int(256*i) for i in colorsys.hls_to_rgb(h,l,s)]
+    return (r, g, b)
+
 @app_run.route("/")
 def index():
 
@@ -17,6 +25,7 @@ def data():
     """
 
     term = request.args.get('term').lower()
+    c = bright_color()
 
     data = []  # Holds response
 
@@ -52,12 +61,15 @@ def data():
             data.append(td)
 
     for o in origin_data:
-        td = {'source': o[0].title(), 'target': skill.name.title(), 'count': o[1]}
+        td = {'source': o[0].title(), 'target': skill.name.title(), 'count': o[1], 'color': c}
         data.append(td)
 
     for t in target_data:
-        td = {'source': skill.name.title(), 'target': t[0].title(), 'count': t[1]}
+        td = {'source': skill.name.title(), 'target': t[0].title(), 'count': t[1], 'color': c}
         data.append(td)
+
+    # colors
+
 
     return jsonify({'data': data})
 
