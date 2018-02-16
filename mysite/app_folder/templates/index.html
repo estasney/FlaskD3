@@ -124,24 +124,10 @@ function newLinks(search_data) {
 }
 
 function restart() {
-  var l = svg.selectAll(".link")
-    .data(graph.links, function(d) {
-      return d.source + "," + d.target;
-    });
-  clearLinks(l);
-  var n = svg.selectAll(".node")
-    .data(graph.nodes, function(d) {
-      return d;
-    });
-  clearNodes(n);
-}
+  svg.selectAll(".link").remove();
 
-function clearNodes(n){
-  n.exit().remove();
-}
+  svg.selectAll(".node").remove();
 
-function clearLinks(l) {
-  l.exit().remove();
 }
 
 function startForce() {
@@ -247,6 +233,7 @@ function startForce() {
       .style("font", "14px serif");
   }
 }
+
 
 
 </script>
