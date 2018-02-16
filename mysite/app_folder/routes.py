@@ -39,6 +39,8 @@ def data():
         limit = int(limit)
         if limit < 3:
             limit = 3
+        elif limit > 25:
+            limit = 25
     else:
         limit = 3
 

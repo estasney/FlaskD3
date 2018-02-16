@@ -41,7 +41,7 @@
         <button class="btn btn-secondary" type="button" id="search">Go!</button>
       </span>
       <span class="input-group-btn">
-        <button class="btn btn-secondary" type="button" id="reset">Reset!</button>
+        <button class="btn btn-secondary disabled" type="button" id="reset">Reset!</button>
       </span>
     </div>
   </div>
@@ -54,7 +54,26 @@
 <script>
 var data_url = "http://127.0.0.1:5000/data";
 $('#search').on('click', startSearch);
-$('#reset').on('click', reset);
+$('#reset').on('click', restart);
+$('#reset').on('click', enableGo);
+$('#reset').on('click', clearGraph);
+
+function disableGo() {
+  $('#search').addClass('disabled');
+  $('#reset').removeClass('disabled');
+  }
+
+function enableGo() {
+$('#search').removeClass('disabled');
+  $('#reset').addClass('disabled');
+  }
+
+function clearGraph(){
+  graph = {
+    "nodes": [],
+    "links": []
+};
+}
 
 var width = window.innerWidth;
 var height = window.innerHeight;
@@ -74,6 +93,7 @@ function startSearch() {
     var search_term = $("#search_term").prop('value');
     var limit_to = $('#limit_to').prop('value');
     getData(search_term, limit_to, false);
+    disableGo();
 }
 
 function appendSearch(clicked_term) {
