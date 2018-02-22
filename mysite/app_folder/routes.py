@@ -13,10 +13,13 @@ def bright_color():
     r,g,b = [int(256*i) for i in colorsys.hls_to_rgb(h,l,s)]
     return (r, g, b)
 
-@app_run.route("/")
+@app_run.route('/')
 def index():
+    return 'Navigate to /topics or /keywords'
 
-    return render_template('index.html')
+@app_run.route("/topics")
+def topics():
+    return render_template('topics.html')
 
 @app_run.route("/data")
 def data():
@@ -64,6 +67,11 @@ def data():
 
 
     return jsonify({'data': data})
+
+@app_run.route('keywords')
+
+def keywords():
+
 
 
 
