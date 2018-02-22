@@ -7,6 +7,13 @@ import pandas as pd
 
 import random
 import colorsys
+import numpy as np
+from gensim.summarization.keywords import get_graph
+from gensim.summarization.pagerank_weighted import pagerank_weighted
+from operator import itemgetter
+import pandas as pd
+import math
+from colour import Color
 
 def bright_color():
     h,s,l = random.random(), 0.5 + random.random()/2.0, 0.4 + random.random()/5.0
@@ -68,9 +75,67 @@ def data():
 
     return jsonify({'data': data})
 
-@app_run.route('keywords')
-
+@app_run.route('/keywords')
 def keywords():
+    return render_template('keywords.html')
+
+def get_cat(x, std_dev):
+    return math.floor(x/std_dev)
+
+
+def assign_deviations(scores_dict):
+    std_dev = np.std(list(scores_dict.values()))
+    scores_list = [(k, v) for k, v in scores_dict.items()]
+    scores_list = sorted(scores_list, key=itemgetter(1))
+
+    df = pd.DataFrame(scores_list)
+    df['Cat'] = df[1].apply(lambda x: get_cat(x, std_dev))
+    df1 = df[[0, 'Cat']]
+    cats_created = df1['Cat'].max() + 1
+    cat_dict = dict(list(df1.to_records(index=False)))
+    return cat_dict, cats_created
+
+def compute_colors_dict(steps, low="blue", high="red"):
+    low = Color(low)
+    high = Color(high)
+    color_list = list(low.range_to(high, steps))
+    color_dict = {}
+    for i, color in enumerate(color_list):
+        rgb = color.get_rgb()
+        rgb_web = []
+        for r in rgb:
+            rgb_web.append(int(r * 255))
+        rgb_web = tuple(rgb_web)
+        color_dict[i] = rgb_web
+    return color_dict
+
+@app_run.route('/kw_data', methods=['POST'])
+def kw_data():
+    raw_text = request.form.get('raw_text')
+    if raw_text:
+        graph = get_graph(raw_text)
+    else:
+        abort(401)
+
+    edges = graph.edges()
+    data = []
+    scores = pagerank_weighted(graph)
+    dev_dict, dev_count = assign_deviations(scores)
+    color_dict = compute_colors_dict(dev_count)
+    for edge in edges:
+        source, target = edge
+        source_score, target_score = int(dev_dict.get(source, 0)), int(dev_dict.get(target, 0))
+        source_color, target_color = (color_dict.get(source_score, color_dict[0])), (color_dict.get(target_score, color_dict[0]))
+        td = {'source': source, 'source_score': source_score, 'target': target, 'target_score': target_score,
+              'source_color': source_color, 'target_color': target_color}
+        data.append(td)
+
+    return jsonify({'data': data})
+
+
+
+
+
 
 
 
