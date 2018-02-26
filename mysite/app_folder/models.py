@@ -57,8 +57,8 @@ class Node(db.Model):
     scores = db.Column(db.Float)
 
     def neighbors(self):
-        highers = [(x.higher_node.name, x.freq) for x in self.lower_edges]
-        lowers = [(x.lower_node.name, x.freq) for x in self.higher_edges]
+        highers = [(x.higher_node.name, x.freq, x.higher_node.scores) for x in self.lower_edges if x.higher_node.id != self.id]
+        lowers = [(x.lower_node.name, x.freq, x.lower_node.scores) for x in self.higher_edges if x.lower_node.id != self.id]
         combined = highers + lowers
         return sorted(combined, key=itemgetter(1), reverse=True)
 

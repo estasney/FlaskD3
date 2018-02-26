@@ -140,15 +140,43 @@ def jobs():
 @app_run.route('/jobs_data')
 def job_data():
     term = request.args.get('term').lower()
-    print(term)
+    limit_to = request.args.get('limit')
+    if limit_to:
+        limit_to = int(limit_to)
+    present = request.headers.get('Present')
+    print(present)
+    if present:
+        present = present.split(",")
+        print("Present Header")
+        print(present)
+
     node = Node.query.filter_by(name=term).first()
-    print(node)
+
     if not node:
         abort(401)
 
     node_neighbors = node.neighbors()
+    if limit_to and not present:
+        sorted_neighbors = sorted([x for x in node_neighbors], key=itemgetter(2), reverse=True)
+        if len(sorted_neighbors) <= limit_to:
+            node_neighbors = sorted_neighbors
+        else:
+            node_neighbors = sorted_neighbors[:limit_to]
+    elif limit_to and present:
+        unique_neighbors = ([x for x in node_neighbors if x[0] not in present])
+        sorted_neighbors = sorted([x for x in unique_neighbors], key=itemgetter(2), reverse=True)
+        if len(sorted_neighbors) <= limit_to:
+            node_neighbors = sorted_neighbors
+        else:
+            node_neighbors = sorted_neighbors[:limit_to]
+    elif present and not limit_to:
+        unique_neighbors = ([x for x in node_neighbors if x[0] not in present])
+        sorted_neighbors = sorted([x for x in unique_neighbors], key=itemgetter(2), reverse=True)
+        node_neighbors = sorted_neighbors
+
     neighbor_names = [x[0] for x in node_neighbors]
-    node_neighbors_scores = {x: Node.query.filter_by(name=x).first().scores for x, y in node_neighbors if x!=term}
+    print(neighbor_names)
+    node_neighbors_scores = {name: score for name, freq, score in node_neighbors if name != term}
     node_neighbors_scores[term] = node.scores
 
     data = []
