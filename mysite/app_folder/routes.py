@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, abort, jsonify, Response
 from operator import itemgetter
 from app_folder import app_run
-from app_folder.models import Skill, Association
+from app_folder.models import Skill, Association, Node, Edge
 
 import pandas as pd
 
@@ -131,6 +131,40 @@ def kw_data():
         data.append(td)
 
     return jsonify({'data': data})
+
+@app_run.route('/jobs')
+
+def jobs():
+    return render_template('jobs.html')
+
+@app_run.route('/jobs_data')
+def job_data():
+    term = request.args.get('term').lower()
+    print(term)
+    node = Node.query.filter_by(name=term).first()
+    print(node)
+    if not node:
+        abort(401)
+
+    node_neighbors = node.neighbors()
+    neighbor_names = [x[0] for x in node_neighbors]
+    node_neighbors_scores = {x: Node.query.filter_by(name=x).first().scores for x, y in node_neighbors if x!=term}
+    node_neighbors_scores[term] = node.scores
+
+    data = []
+    dev_dict, dev_count = assign_deviations(node_neighbors_scores)
+    color_dict = compute_colors_dict(dev_count)
+    for neighbor in neighbor_names:
+        source, target = term, neighbor
+        source_score, target_score = int(dev_dict.get(source, 0)), int(dev_dict.get(target, 0))
+        source_color, target_color = (color_dict.get(source_score, color_dict[0])), (
+        color_dict.get(target_score, color_dict[0]))
+        td = {'source': source, 'source_score': source_score, 'target': target, 'target_score': target_score,
+              'source_color': source_color, 'target_color': target_color}
+        data.append(td)
+
+    return jsonify({'data': data})
+
 
 
 
