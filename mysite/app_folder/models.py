@@ -95,3 +95,58 @@ class Edge(db.Model):
 
         self.lower_node = n1
         self.higher_node = n2
+
+
+node_links = {}
+TOP_N = 10
+LAYERS = 10
+
+
+def filter_top(neighbors, top_n=TOP_N, expanded=None):
+    sorted_neighbors = sorted(neighbors, key=itemgetter(2), reverse=True)
+    if expanded:
+        sorted_neighbors = [neighbor for neighbor in sorted_neighbors if neighbor[0] not in expanded]
+    sorted_neighbors = [neighbor for neighbor in sorted_neighbors][:top_n]
+    return sorted_neighbors
+
+def process_node(node_name):
+    node = Node.query.filter_by(name=node_name).first()
+    neighbors = filter_top(node.neighbors())
+    for n in neighbors:
+        if node_name in node_links:
+            if n not in node_links[node_name]:
+                ol = node_links[node_name]
+                ol.append(n)
+                node_links[node_name] = ol
+
+def expand(root, layers=LAYERS):
+    root_neighbors = filter_top(root.neighbors())
+    layer_counter = 0
+    expanded = {}
+    checked = []
+    while layer_counter < layers:
+        if not expanded:
+            for rn in root_neighbors:
+                dict_n = expanded.get(root.name, [])
+                dict_n.append(rn[0])
+                expanded[root.name] = dict_n
+            layer_counter += 1
+            checked.append(root.name)
+            continue
+        for targets in list(expanded.values()):
+            for target in targets:
+                if target in checked:
+                    continue
+                a_node = Node.query.filter_by(name=target).first()
+                a_neighbors = filter_top(a_node.neighbors(), top_n=TOP_N, expanded=expanded)
+
+                for b in a_neighbors:
+                    n_dict = expanded.get(target, [])
+                    n_dict.append(b[0])
+                    expanded[target] = n_dict
+                checked.append(target)
+        layer_counter += 1
+        continue
+    for k in expanded.keys():
+        for v in expanded[k]:
+            yield (k, v)
